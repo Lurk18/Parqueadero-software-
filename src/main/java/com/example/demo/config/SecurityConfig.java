@@ -33,7 +33,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("administrador")
-                                .requestMatchers("/api/parqueadero/**").hasAnyRole("administrador", "usuario")
+                                .requestMatchers("/api/registro/**").hasRole("administrador")
+                                .requestMatchers("/api/parqueaderos/**").hasAnyRole("administrador", "usuario")
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManager ->

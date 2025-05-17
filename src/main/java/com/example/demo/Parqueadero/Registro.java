@@ -26,12 +26,13 @@ public class Registro {
     @JoinColumn(name = "parqueadero_id", nullable = false)
     private Parqueadero parqueadero;
 
+    @Column(name = "fecha_entrada", nullable = false)
+    private LocalDateTime fechaEntrada;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_ad", nullable = false)
     private User usuarioAdministrador;
 
-    @Column(name = "fecha_entrada", nullable = false)
-    private LocalDateTime fechaEntrada;
 
     @Column(name = "fecha_salida")
     private LocalDateTime fechaSalida;
