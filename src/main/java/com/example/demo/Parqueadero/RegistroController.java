@@ -25,7 +25,7 @@ public class RegistroController {
     private final RegistroService registroService;
 
     // Registrar entrada
-    @PostMapping("/entrada")
+    @PostMapping("/entrada") // POST {vehiculo, parqueadero}
     public ResponseEntity<Registro> registrarEntrada(@RequestBody Registro registro) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();

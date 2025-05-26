@@ -18,18 +18,18 @@ public class Registro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "vehiculo_id", nullable = false)
     private Vehiculo vehiculo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "parqueadero_id", nullable = false)
     private Parqueadero parqueadero;
 
     @Column(name = "fecha_entrada", nullable = false)
     private LocalDateTime fechaEntrada;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_ad", nullable = false)
     private User usuarioAdministrador;
 

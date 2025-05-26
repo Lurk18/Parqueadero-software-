@@ -1,11 +1,11 @@
 package com.example.demo.Parqueadero;
 
+import com.example.demo.User.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-
-import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -18,12 +18,23 @@ public class Membresia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "nombre", nullable = false, length = 50)
-    private String nombre;
+    @OneToOne
+    @JoinColumn(name = "usuario_id", referencedColumnName = "id", nullable = false, unique = true)
+    private User usuario;
 
-    @Column(name = "duracion_d", nullable = false)
-    private Integer duracionDias;
+    @Column(name = "fecha_inicio", nullable = false)
+    private LocalDate fechaInicio;
 
-    @Column(name = "precio", nullable = false, precision = 10, scale = 2)
-    private BigDecimal precio;
+    @Column(name = "fecha_fin", nullable = false)
+    private LocalDate fechaFin;
+
+    @Column(name = "vigente", nullable = false)
+    private Boolean vigente;
+
+    public Membresia (User usuario) {
+        this.usuario = usuario;
+        this.fechaInicio = LocalDate.now();
+        this.fechaFin = this.fechaInicio.plusMonths(1);
+        this.vigente = true;
+    }
 }

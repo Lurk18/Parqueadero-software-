@@ -1,5 +1,6 @@
 package com.example.demo.Parqueadero;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -33,10 +34,8 @@ public class Vehiculo {
     @Column(length = 50)
     private String color;
 
-
-    @JoinColumn(name = "usuario_id")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id", nullable = false)
     private User usuario;
 
     @PrePersist
