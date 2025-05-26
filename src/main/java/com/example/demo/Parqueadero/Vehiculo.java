@@ -7,6 +7,7 @@ import com.example.demo.User.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Data
@@ -32,8 +33,10 @@ public class Vehiculo {
     @Column(length = 50)
     private String color;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "usuario_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     private User usuario;
 
     @PrePersist
