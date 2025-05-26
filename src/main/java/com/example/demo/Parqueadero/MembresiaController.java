@@ -1,45 +1,33 @@
 package com.example.demo.Parqueadero;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.User.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/membresias")
-@RequiredArgsConstructor
-@PreAuthorize("hasRole('administrador')")
-
+@RequestMapping("/api/membresia")
 public class MembresiaController {
+    private final MembresiaService membresiaService;
 
-    @Autowired
-    private MembresiaService membresiaService;
-
-    @GetMapping("/usuario/{userId}")
-    public ResponseEntity<?> obtenerMembresia(@PathVariable Integer userId) {
-        return membresiaService.obtenerMembresiaDeUsuario(userId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public MembresiaController(MembresiaService membresiaService) {
+        this.membresiaService = membresiaService;
     }
 
-    @PostMapping("/usuario/{userId}")
-    public ResponseEntity<?> crearMembresia(@PathVariable Integer userId) {
-        try {
-            Membresia membresia = membresiaService.crearMembresiaParaUsuario(userId);
-            return ResponseEntity.ok(membresia);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    @PostMapping("/comprar")
+    public ResponseEntity<Membresia> comprarMembresia(@RequestBody User usuario) {
+        return ResponseEntity.ok(membresiaService.crearORenovarMembresia(usuario));
     }
 
-    @GetMapping("/usuario/{userId}/existe")
-    public ResponseEntity<Boolean> verificarSiTieneMembresia(@PathVariable Integer userId) {
-        return ResponseEntity.ok(membresiaService.usuarioTieneMembresia(userId));
+    // Corregido: Recibe usuarioId como path variable y no usa RequestBody para GET
+    @GetMapping("/verificar/{usuarioId}")
+    public ResponseEntity<Boolean> verificarMembresia(@PathVariable Integer usuarioId) {
+        boolean tieneMembresia = membresiaService.tieneMembresiaVigentePorUsuarioId(usuarioId);
+        return ResponseEntity.ok(tieneMembresia);
     }
 
-    @GetMapping("/usuario/{userId}/vigente")
-    public ResponseEntity<Boolean> esMembresiaVigente(@PathVariable Integer userId) {
-        return ResponseEntity.ok(membresiaService.esMembresiaVigente(userId));
+    @PostMapping("/cancelar")
+    public ResponseEntity<Void> cancelarMembresia(@RequestBody User usuario) {
+        membresiaService.desactivarMembresia(usuario);
+        return ResponseEntity.noContent().build();
     }
 }

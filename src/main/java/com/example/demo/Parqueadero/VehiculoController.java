@@ -18,7 +18,7 @@ public class VehiculoController {
 
     private final VehiculoRepository vehiculoRepository;
     private final UserRepository userRepository;
-    private final RegistroRepository registroRepository; // 👈 Agregado
+    private final RegistroRepository registroRepository; //
 
     // Crear vehículo
     @PostMapping("/registrar")

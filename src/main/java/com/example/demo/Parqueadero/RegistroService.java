@@ -1,5 +1,6 @@
 package com.example.demo.Parqueadero;
 
+import com.example.demo.User.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,9 @@ public class RegistroService {
     private final TarifaRepository tarifaRepository;
     private final ParqueaderoRepository parqueaderoRepository;
     private final VehiculoRepository vehiculoRepository;
+    private final MembresiaRepository membresiaRepository;
 
     public Registro registrarEntrada(Registro registro) {
-        // 1. Validar y obtener el parqueadero desde la BD
         Parqueadero parqueadero = parqueaderoRepository.findById(registro.getParqueadero().getId())
                 .orElseThrow(() -> new RuntimeException("Parqueadero no encontrado"));
 
@@ -26,7 +27,6 @@ public class RegistroService {
             throw new RuntimeException("El parqueadero ya está ocupado");
         }
 
-        // 2. Validar y obtener el vehículo desde la BD
         if (registro.getVehiculo() == null || registro.getVehiculo().getId() == null) {
             throw new RuntimeException("Debe proporcionar un ID de vehículo válido");
         }
@@ -34,11 +34,9 @@ public class RegistroService {
         Vehiculo vehiculo = vehiculoRepository.findById(registro.getVehiculo().getId())
                 .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
 
-        // 3. Marcar parqueadero como ocupado
         parqueadero.setDisponible(false);
         parqueaderoRepository.save(parqueadero);
 
-        // 4. Asignar los objetos reales al registro
         registro.setParqueadero(parqueadero);
         registro.setVehiculo(vehiculo);
         if (registro.getFechaEntrada() == null) {
@@ -72,6 +70,17 @@ public class RegistroService {
 
         BigDecimal tarifaPorHora = tarifa.getTarifaHora();
         BigDecimal total = tarifaPorHora.multiply(horas, new MathContext(2));
+
+        // APLICAR DESCUENTO SI EL USUARIO TIENE MEMBRESÍA VIGENTE (20%)
+        User usuario = registro.getVehiculo().getUsuario();
+        boolean tieneMembresiaVigente = membresiaRepository.findByUsuario_Id(usuario.getId())
+                .map(m -> m.isVigente() && !java.time.LocalDate.now().isAfter(m.getFechaFin()))
+                .orElse(false);
+
+        if (tieneMembresiaVigente) {
+            BigDecimal descuento = new BigDecimal("0.20"); // 20% de descuento
+            total = total.subtract(total.multiply(descuento));
+        }
 
         registroRepository.save(registro);
 

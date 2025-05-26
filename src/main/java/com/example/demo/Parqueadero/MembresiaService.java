@@ -1,42 +1,49 @@
 package com.example.demo.Parqueadero;
 
 import com.example.demo.User.User;
-import com.example.demo.User.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
+
+import java.time.LocalDate;
 
 @Service
 public class MembresiaService {
-    @Autowired
-    private MembresiaRepository membresiaRepository;
+    private final MembresiaRepository membresiaRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    public boolean usuarioTieneMembresia(Integer userId) {
-        return membresiaRepository.findByUsuario_Id(userId).isPresent();
+    public MembresiaService(MembresiaRepository membresiaRepository) {
+        this.membresiaRepository = membresiaRepository;
     }
-
-    public boolean esMembresiaVigente(Integer userId) {
-        return obtenerMembresiaDeUsuario(userId)
-                .map(Membresia::getVigente)
+    public boolean tieneMembresiaVigentePorUsuarioId(Integer usuarioId) {
+        return membresiaRepository.findByUsuario_Id(usuarioId)
+                .map(Membresia::isVigente)
                 .orElse(false);
     }
 
-    public Membresia crearMembresiaParaUsuario(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (usuarioTieneMembresia(userId)) {
-            throw new RuntimeException("El usuario ya tiene una membresía");
-        }
+    // Método para crear o renovar la membresía
+    public Membresia crearORenovarMembresia(User usuario) {
+        Membresia membresia = membresiaRepository.findByUsuario_Id(usuario.getId())
+                .orElse(new Membresia());
 
-        Membresia membresia = new Membresia(user);
+        membresia.setUsuario(usuario);
+        membresia.renovar();
         return membresiaRepository.save(membresia);
     }
 
-    public Optional<Membresia> obtenerMembresiaDeUsuario(Integer userId) {
-        return membresiaRepository.findByUsuario_Id(userId);
+    // Método para verificar si la membresía está vigente (fecha y flag)
+    public boolean tieneMembresiaVigente(User usuario) {
+        return membresiaRepository.findByUsuario_Id(usuario.getId())
+                .map(m -> m.isVigente() &&
+                        !LocalDate.now().isBefore(m.getFechaInicio()) &&
+                        !LocalDate.now().isAfter(m.getFechaFin()))
+                .orElse(false);
+    }
+
+    // Método para cancelar la membresía
+    public void desactivarMembresia(User usuario) {
+        membresiaRepository.findByUsuario_Id(usuario.getId())
+                .ifPresent(membresia -> {
+                    membresia.cancelar();
+                    membresiaRepository.save(membresia);
+                });
     }
 }
