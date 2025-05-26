@@ -18,6 +18,7 @@ public class RegistroService {
     private final ParqueaderoRepository parqueaderoRepository;
     private final VehiculoRepository vehiculoRepository;
     private final MembresiaRepository membresiaRepository;
+    private final ComunidadUISRepository comunidadUISRepository;
 
     public Registro registrarEntrada(Registro registro) {
         Parqueadero parqueadero = parqueaderoRepository.findById(registro.getParqueadero().getId())
@@ -71,13 +72,17 @@ public class RegistroService {
         BigDecimal tarifaPorHora = tarifa.getTarifaHora();
         BigDecimal total = tarifaPorHora.multiply(horas, new MathContext(2));
 
-        // APLICAR DESCUENTO SI EL USUARIO TIENE MEMBRESÍA VIGENTE (20%)
+        // APLICAR DESCUENTO SI EL USUARIO TIENE MEMBRESÍA VIGENTE (20%) O SI ES UIS (100%)
         User usuario = registro.getVehiculo().getUsuario();
         boolean tieneMembresiaVigente = membresiaRepository.findByUsuario_Id(usuario.getId())
                 .map(m -> m.isVigente() && !java.time.LocalDate.now().isAfter(m.getFechaFin()))
                 .orElse(false);
 
-        if (tieneMembresiaVigente) {
+        boolean esComunidadUis = comunidadUISRepository.findByUsuario_Id(usuario.getId()).isPresent();
+        if (esComunidadUis) {
+            total = BigDecimal.ZERO;
+        }
+        else if (tieneMembresiaVigente) {
             BigDecimal descuento = new BigDecimal("0.20"); // 20% de descuento
             total = total.subtract(total.multiply(descuento));
         }

@@ -16,21 +16,9 @@ public class Membresia {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", unique = true, nullable = false)
     private User usuario;
-
-    @Column(nullable = false, length = 100)
-    private String nombre = "Membresía Única";  // Fijo
-
-    @Column(name = "duracion_dias", nullable = false)
-    private Integer duracionDias = 30;  // Fijo 30 días
-
-    @Column(name = "duracion_d", nullable = false)
-    private Integer duracionD = 30; // Campo para mapear la columna 'duracion_d' y evitar error de null
-
-    @Column(nullable = false)
-    private Double precio = 50.0;  // Precio mensual fijo
 
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
@@ -44,9 +32,8 @@ public class Membresia {
     // Método para renovar (extiende la fecha fin)
     public void renovar() {
         this.fechaInicio = LocalDate.now();
-        this.fechaFin = fechaInicio.plusDays(duracionDias);
+        this.fechaFin = fechaInicio.plusMonths(1);
         this.vigente = true;
-        this.duracionD = duracionDias; // Asegurar que no quede null en la columna
     }
 
     // Método para cancelar
